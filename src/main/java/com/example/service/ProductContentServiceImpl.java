@@ -9,12 +9,15 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -81,6 +84,16 @@ public class ProductContentServiceImpl implements ProductContentService{
         //设置超时
         searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
 
+        //设置高亮
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.field("title");
+        //不需要设置多个字段高亮
+        highlightBuilder.requireFieldMatch(false);
+        //设置高亮的有关标签
+        highlightBuilder.preTags("<span style='color:red‘>");
+        highlightBuilder.postTags("</span>");
+        searchSourceBuilder.highlighter(highlightBuilder);
+
         //执行搜索
         goodsSearch.source(searchSourceBuilder);
         SearchResponse search = restHighLevelClient.search(goodsSearch, RequestOptions.DEFAULT);
@@ -89,7 +102,23 @@ public class ProductContentServiceImpl implements ProductContentService{
         List<Map<String, Object>> results = new ArrayList<>();
 
         for (SearchHit hit : search.getHits().getHits()) {
-            results.add(hit.getSourceAsMap());
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            //解析高亮的字段
+            //获取高亮字段
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            HighlightField title = highlightFields.get("title");
+            if (title!=null){
+                //将title的内容取出
+                Text[] fragments = title.fragments();
+                String defaultTitle="";
+                for (Text fragment : fragments) {
+                    defaultTitle+=fragment;
+                }
+                //将高亮显示的标题添加到map中，覆盖原来的标题
+                sourceAsMap.put("title",defaultTitle);
+            }
+
+            results.add(sourceAsMap);
         }
 
         return results;

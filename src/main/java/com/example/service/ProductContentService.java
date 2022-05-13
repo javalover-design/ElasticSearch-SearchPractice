@@ -30,4 +30,6 @@ public interface ProductContentService {
      * @throws IOException the io exception
      */
     List<Map<String,Object>> searchPage(String keyword,Integer pageNo,Integer pageSize) throws IOException;
+
+
 }

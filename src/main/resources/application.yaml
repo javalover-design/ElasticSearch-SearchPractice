@@ -4,4 +4,4 @@ server:
 # 关闭thymeleaf缓存
 spring:
   thymeleaf:
-    cache: true
+    cache: false

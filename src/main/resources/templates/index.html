@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <title>ES仿京东实战</title>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
-    <script th:src="@{/js/jquery.min.js}"></script>
+<!--    <script th:src="@{/js/jquery.min.js}"></script>-->
 </head>
 <body class="pg">
 <div class="page">
@@ -16,10 +16,11 @@
                     <!-- Logo-->
                     <h1 id="mallLogo">
                         <img th:src="@{/images/jdlogo.png}" alt="">
+
                     </h1>
                     <div class="header-extra">
                         <!--搜索-->
-                        <div id="mallSearch" class="mall-search">
+                        <div  id="mallSearch" class="mall-search">
                             <form name="searchTop" class="mallSearch-form clearfix">
                                 <fieldset>
                                     <legend>天猫搜索</legend>
@@ -87,15 +88,15 @@
                             </div>
                             &lt;!&ndash;价格&ndash;&gt;
                             <p class="productPrice">
-                                <em v-text="result.price"></em>
+                               <em>{{result.price}}</em>
                             </p>
                             &lt;!&ndash;标题&ndash;&gt;
                             <p class="productTitle">
-                                <a v-html="result.name"></a>
+                                <a v-html="result.title" ></a>
                             </p>
                             &lt;!&ndash; 店铺名 &ndash;&gt;
                             <div class="productShop">
-                                <span v-text="result.shopnum"></span>
+                                <span >梦想加油站</span>
                             </div>
                             &lt;!&ndash; 成交信息 &ndash;&gt;
                             <p class="productStatus">
@@ -109,26 +110,36 @@
         </div>
     </div>
 </div>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+<!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+<!--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+
+<!--前端使用vue实现前后端分离-->
+<script th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/js/axios.min.js}"></script>
+<script th:src="@{/js/vue.min.js}"></script>
 <script>
     new Vue({
-        el: "#app",
-        data: {
-            "keyword": '', // 搜索的关键字
-            "results": [] // 后端返回的结果
+        el:`#app`, //绑定的元素
+        data:{
+            keyword:'',//搜索关键字
+            results: [] //搜索结果
         },
-        methods: {
-            searchKey() {
-                var keyword = this.keyword;
-                console.log(keyword);
-                axios.get('searchHighLight/' + keyword + '/0/20').then(response => {
-                    console.log(response);
-                    this.results = response.data;
+
+        methods:{
+            //定义一个方法
+            searchKey(){
+                var keyword=this.keyword;
+                // console.log(keyword);
+                //获取到对应的关键字后对接后端的接口
+                axios.get("search/"+keyword+"/1/20").then(response=>{
+                            console.log(response);
+                            //获取到的内容赋予给结果results之后进行遍历
+                             this.results=response.data
                 })
             }
         }
-    });
+    })
 </script>
 </body>
 </html>
